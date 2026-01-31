@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>WAN IP Settings</title>
+    <link rel="stylesheet" href="https://sdpi-components.dev/releases/v3/sdpi-components.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #2D2D2D;
+            color: #E8E8E8;
+            padding: 0;
+            margin: 0;
+        }
+        .sdpi-wrapper {
+            padding: 0 16px;
+        }
+        .sdpi-item {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+        }
+        .sdpi-item-label {
+            flex: 0 0 90px;
+            font-size: 12px;
+            color: #9B9B9B;
+        }
+        .sdpi-item-value {
+            flex: 1;
+        }
+        select {
+            width: 100%;
+            padding: 6px 8px;
+            border: none;
+            border-radius: 4px;
+            background-color: #3D3D3D;
+            color: #E8E8E8;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #0078D7;
+        }
+        .info {
+            font-size: 11px;
+            color: #9B9B9B;
+            margin-top: 16px;
+            padding: 8px;
+            background-color: #1E1E1E;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sdpi-wrapper">
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">Display</div>
+            <div class="sdpi-item-value">
+                <select id="displayLines">
+                    <option value="1">1 Line (192.168.1.100)</option>
+                    <option value="2">2 Lines (192.168 / 1.100)</option>
+                    <option value="4">4 Lines (each octet)</option>
+                </select>
+            </div>
+        </div>
+        <div class="info">
+            Press the key to copy the IP address to your clipboard.
+        </div>
+    </div>
+
+    <script>
+        // Connect to Stream Deck
+        let websocket = null;
+        let pluginUUID = null;
+
+        // Called by Stream Deck when the property inspector loads
+        function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegisterEvent, inInfo, inActionInfo) {
+            pluginUUID = inPropertyInspectorUUID;
+
+            // Parse the action info to get current settings
+            const actionInfo = JSON.parse(inActionInfo);
+            const settings = actionInfo.payload.settings;
+
+            // Set the dropdown to the current value
+            if (settings.displayLines) {
+                document.getElementById("displayLines").value = settings.displayLines;
+            }
+
+            // Connect to Stream Deck
+            websocket = new WebSocket("ws://127.0.0.1:" + inPort);
+
+            websocket.onopen = function() {
+                // Register the property inspector
+                websocket.send(JSON.stringify({
+                    event: inRegisterEvent,
+                    uuid: pluginUUID
+                }));
+            };
+
+            websocket.onmessage = function(evt) {
+                const message = JSON.parse(evt.data);
+
+                // Handle settings updates from the plugin
+                if (message.event === "didReceiveSettings") {
+                    const settings = message.payload.settings;
+                    if (settings.displayLines) {
+                        document.getElementById("displayLines").value = settings.displayLines;
+                    }
+                }
+            };
+        }
+
+        // When the dropdown changes, save the new setting
+        document.getElementById("displayLines").addEventListener("change", function() {
+            const value = parseInt(this.value, 10);
+
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.send(JSON.stringify({
+                    event: "setSettings",
+                    context: pluginUUID,
+                    payload: {
+                        displayLines: value
+                    }
+                }));
+            }
+        });
+    </script>
+</body>
+</html>

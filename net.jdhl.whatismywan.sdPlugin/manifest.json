@@ -1,0 +1,46 @@
+{
+	"Name": "What is My WAN",
+	"Version": "0.1.0.0",
+	"Author": "Joshua Davis",
+	"Actions": [
+		{
+			"Name": "Show WAN IP",
+			"UUID": "net.jdhl.whatismywan.show-ip",
+			"Icon": "imgs/actions/wan-ip/icon",
+			"Tooltip": "Displays your public IP address. Press to copy to clipboard.",
+			"PropertyInspectorPath": "ui/show-wan-ip.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/wan-ip/key"
+				}
+			]
+		}
+	],
+	"Category": "What is My WAN",
+	"CategoryIcon": "imgs/plugin/category-icon",
+	"CodePath": "bin/plugin.js",
+	"Description": "Shows your public IP address and copies it to clipboard when pressed.",
+	"Icon": "imgs/plugin/marketplace",
+	"SDKVersion": 3,
+	"Software": {
+		"MinimumVersion": "6.9"
+	},
+	"OS": [
+		{
+			"Platform": "mac",
+			"MinimumVersion": "12"
+		},
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		}
+	],
+	"Nodejs": {
+		"Version": "20",
+		"Debug": "enabled"
+	},
+	"UUID": "net.jdhl.whatismywan"
+}
